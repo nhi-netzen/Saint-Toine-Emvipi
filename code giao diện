@@ -654,6 +654,9 @@ def on_click_3(e):
         play_bob()
         open_cattle_shed()
         threading.Thread(target=rain_close).start()
+    elif 1637 <= e.x <= 1870 and 800<= e.y <= 957:
+        play_bob()
+        threading.Thread(target=rain_auto).start()
     elif 64 <= e.x <= 235 and 32 <= e.y <= 195:
         play_bob()
         open_home()
