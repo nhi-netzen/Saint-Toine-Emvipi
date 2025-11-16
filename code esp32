@@ -1,0 +1,494 @@
+#include <WiFi.h>
+#include <WebServer.h>
+#include "DHT.h"
+#include <ESP32Servo.h>
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+#include <SinricPro.h>
+#include <SinricProSwitch.h>
+
+
+// ================= WiFi =================
+const char* ssid = "iPhone";
+const char* password = "20092006";
+WebServer server(80);
+
+
+// ================= Cảm biến DHT =================
+#define DHTPIN 4
+#define DHTTYPE DHT22
+DHT dht(DHTPIN, DHTTYPE);
+float temperature = 0;
+float humidity = 0;
+
+
+// ================= Cảm biến đất & mưa =================
+#define SOIL_PIN 32
+#define RAIN_PIN 33
+#define TOUCH_PIN 2
+#define BUZZER_PIN 14
+int soilPercent = 0;
+bool buzzerState = false;
+
+
+// ================= Sinric Pro =================
+#define APP_KEY "8ce92fa2-3cd0-416a-b3c3-ba6adab695e2"
+#define APP_SECRET "2e189b75-1a8c-4705-846c-eda928969de6-f1712d1c-e93a-49bd-afeb-b2fe5442f6b4"
+#define LED_CTRL_ID "6900b3a45918d860c0ac0b67"
+#define DOOR_CTRL_ID "6900bccdacd5d3d66b57587b"
+#define RAIN_CTRL_ID "6900c18b359ccc32ce179d0d"
+
+
+// ================= Servo =================
+Servo servo27, servo26, rainServo;
+#define RAIN_SERVO_PIN 25
+
+
+// ================= Relay Pump =================
+#define RELAY_PIN 18
+bool manualMode = false;
+bool pumpState = false;
+bool rainManualMode = false; // false = auto, true = manual
+int rainServoPos = 0;        // lưu góc hiện tại (0 = mở, 90 = đóng)
+
+
+// ================= LED & LDR =================
+#define LDR_PIN 35
+#define LED7 19
+#define LED6 16
+#define LED4 23
+#define LED8 12
+#define LED9 17
+#define LED1 13
+#define LED5 0
+#define LED2 15
+#define LED3 5
+bool ledManualMode = false;
+bool ledState = false;
+bool led1State = false;
+bool led2State = false;
+bool led3State = false;
+bool led4State = false;
+bool led5State = false;
+bool led6State = false;
+bool led7State = false;
+bool led8State = false;
+bool led9State = false;
+// ================= Cảm biến chạm & Buzzer =================
+bool touchDetected = false;
+
+
+bool onPowerState(const String &deviceId, bool &state) {
+    if (deviceId == LED_CTRL_ID) {
+        ledManualMode = true;
+        if (state) {
+            // Bật LED
+            ledState = true;
+            led1State = HIGH;
+            led2State = HIGH;
+            led3State = HIGH;
+            led4State = HIGH;
+            led5State = HIGH;
+            led6State = HIGH;
+            led7State = HIGH;
+            led8State = HIGH;
+            led9State = HIGH;
+        } else {
+            // Tắt LED
+            ledState = false;
+            led1State = LOW;
+            led2State = LOW;
+            led3State = LOW;
+            led4State = LOW;
+            led5State = LOW;
+            led6State = LOW;
+            led7State = LOW;
+            led8State = LOW;
+            led9State = LOW;
+
+
+        }
+    }
+    // ✅ Thêm phần điều khiển cửa ở đây
+  else if (deviceId == DOOR_CTRL_ID) {
+    if (state) {
+      // Mở cửa → quay servo 26 và 27 về góc mở
+      servo26.write(5);
+      servo27.write(180);
+      Serial.println("Door opened");
+    } else {
+      // Đóng cửa → quay servo 26 và 27 về góc đóng
+      servo26.write(98);
+      servo27.write(92);
+      Serial.println("Door closed");
+    }
+    SinricProSwitch &doorCtrl = SinricPro[DOOR_CTRL_ID];
+    doorCtrl.sendPowerStateEvent(state);  // ✅ cập nhật trạng thái
+  }
+  else if (deviceId == RAIN_CTRL_ID) {
+  rainManualMode = true;  // chuyển sang chế độ thủ công khi dùng giọng nói
+  if (state) {
+    // Mở mái → servo quay 0 độ
+    rainServo.write(0);
+    rainServoPos = 0;
+    Serial.println("Rain roof opened");
+  } else {
+    // Đóng mái → servo quay 90 độ
+    rainServo.write(90);
+    rainServoPos = 90;
+    Serial.println("Rain roof closed");
+  }
+
+
+  // ✅ Đồng bộ trạng thái SinricPro
+  SinricProSwitch &rainCtrl = SinricPro[RAIN_CTRL_ID];
+  rainCtrl.sendPowerStateEvent(state);
+}
+    return true;
+}
+// ================= LCD =================
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+
+// ================= Server Handlers =================
+void handleServo() {
+    String s27 = server.arg("s27");
+    String s26 = server.arg("s26");
+    servo27.write(s27.toInt());
+    servo26.write(s26.toInt());
+    server.send(200, "text/plain", "Servo moved");
+}
+
+
+void handlePump() {
+    String state = server.arg("state");
+    manualMode = true;
+    if (state == "on") {
+        digitalWrite(RELAY_PIN, LOW);
+        pumpState = true;
+    } else {
+        digitalWrite(RELAY_PIN, HIGH);
+        pumpState = false;
+    }
+    server.send(200, "text/plain", "Pump " + state);
+}
+
+
+void handleAuto() {
+    manualMode = false;
+    server.send(200, "text/plain", "Auto mode enabled");
+}
+
+
+void handleStatus() {
+    temperature = dht.readTemperature();
+    humidity = dht.readHumidity();
+    int soilRaw = analogRead(SOIL_PIN);
+    soilPercent = map(soilRaw, 0, 4095, 0, 100);
+    String rainStatus = (analogRead(RAIN_PIN) < 3000) ? "open" : "close";
+
+
+    String json = "{";
+    json += "\"temp\":" + String(temperature, 1) + ",";
+    json += "\"hum\":" + String(humidity, 1) + ",";
+    json += "\"soil\":" + String(soilPercent) + ",";
+json += "\"rain\":\"" + rainStatus + "\",";  
+json += "\"pump\":\"" + String(pumpState ? "on" : "off") + "\",";  
+json += "\"mode\":\"" + String(manualMode ? "manual" : "auto") + "\",";  
+json += "\"servo27\":" + String(servo27.read()) + ",";  
+json += "\"servo26\":" + String(servo26.read()) + ",";  
+json += "\"buzzer\":\"" + String(buzzerState ? "on" : "off") + "\",";  
+json += "\"touch\":\"" + String(touchDetected ? "detect" : "none") + "\",";  
+json += "\"rain_servo_mode\":\"" + String(rainManualMode ? "manual" : "auto") + "\",";  
+
+
+
+
+    json += "\"rain_servo_pos\":" + String(rainServoPos);
+    json += "}";
+    server.send(200, "application/json", json);
+}
+
+
+// ================= Setup =================
+void setup() {
+    Serial.begin(115200);
+server.on("/status", handleStatus);
+
+
+    // Cảm biến & Buzzer
+    pinMode(BUZZER_PIN, OUTPUT);
+    digitalWrite(BUZZER_PIN, HIGH); // tắt buzzer mặc định
+
+
+    // LCD
+    Wire.begin(21, 22);
+    lcd.init();
+    lcd.backlight();
+    lcd.setCursor(0, 0);
+    lcd.print("ESP32 Smart Sys");
+    lcd.setCursor(0, 1);
+    lcd.print("Connecting WiFi");
+
+
+    // WiFi
+    WiFi.begin(ssid, password);
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(500);
+        Serial.print(".");
+    }
+    Serial.println("\nWiFi Connected!");
+    Serial.println(WiFi.localIP());
+    lcd.clear();
+    lcd.print("WiFi OK");
+    lcd.setCursor(0, 1);
+    lcd.print(WiFi.localIP().toString());
+
+
+    // Cảm biến & Servo
+    dht.begin();
+    servo27.attach(27);
+    servo26.attach(26);
+    rainServo.attach(RAIN_SERVO_PIN);
+
+
+    pinMode(RELAY_PIN, OUTPUT);
+    digitalWrite(RELAY_PIN, HIGH);
+
+
+    pinMode(LDR_PIN, INPUT);
+    pinMode(LED1, OUTPUT);
+    pinMode(LED2, OUTPUT);
+    pinMode(LED3, OUTPUT);
+    pinMode(LED4, OUTPUT);
+    pinMode(LED5, OUTPUT);
+    pinMode(LED6, OUTPUT);
+    pinMode(LED7, OUTPUT);
+    pinMode(LED8, OUTPUT);
+    pinMode(LED9, OUTPUT);
+
+
+    digitalWrite(LED1, LOW);
+    digitalWrite(LED2, LOW);
+    digitalWrite(LED3, LOW);
+    digitalWrite(LED4, LOW);
+    digitalWrite(LED5, LOW);
+    digitalWrite(LED6, LOW);
+    digitalWrite(LED7, LOW);
+    digitalWrite(LED8, LOW);
+    digitalWrite(LED9, LOW);
+
+
+    // ===== Điều khiển từng đèn =====
+    server.on("/led1", []() {
+        String state = server.arg("state");
+        ledManualMode = true;
+        led1State = (state == "on") ? HIGH : LOW;
+        server.send(200, "text/plain", "LED1 " + state);
+    });
+    server.on("/led2", []() {
+        String state = server.arg("state");
+        ledManualMode = true;
+        led2State = (state == "on") ? HIGH : LOW;
+        server.send(200, "text/plain", "LED2 " + state);
+    });
+    server.on("/led3", []() {
+        String state = server.arg("state");
+        ledManualMode = true;
+        led3State = (state == "on") ? HIGH : LOW;
+        server.send(200, "text/plain", "LED3 " + state);
+    });
+    server.on("/led4", []() {
+        String state = server.arg("state");
+        ledManualMode = true;
+        led4State = (state == "on") ? HIGH : LOW;
+        server.send(200, "text/plain", "LED4 " + state);
+    });
+    server.on("/led5", []() {
+        String state = server.arg("state");
+        ledManualMode = true;
+        led5State = (state == "on") ? HIGH : LOW;
+        server.send(200, "text/plain", "LED5 " + state);
+    });
+    server.on("/led6", []() {
+        String state = server.arg("state");
+        ledManualMode = true;
+        led6State = (state == "on") ? HIGH : LOW;
+        server.send(200, "text/plain", "LED6 " + state);
+    });
+    server.on("/led7", []() {
+        String state = server.arg("state");
+        ledManualMode = true;
+        led7State = (state == "on") ? HIGH : LOW;
+        server.send(200, "text/plain", "LED7 " + state);
+    });
+    server.on("/led8", []() {
+        String state = server.arg("state");
+        ledManualMode = true;
+        led8State = (state == "on") ? HIGH : LOW;
+        server.send(200, "text/plain", "LED8 " + state);
+    });
+    server.on("/led9", []() {
+        String state = server.arg("state");
+        ledManualMode = true;
+        led9State = (state == "on") ? HIGH : LOW;
+        server.send(200, "text/plain", "LED9 " + state);
+    });
+
+
+    // ===== WebServer =====
+    server.on("/servo", handleServo);
+    server.on("/pump", handlePump);
+    server.on("/status", handleStatus);
+    server.on("/auto", handleAuto);
+    server.on("/led", []() {
+        String state = server.arg("state");
+        ledManualMode = true;
+        ledState = (state == "on") ? HIGH : LOW;
+        server.send(200, "text/plain", "LED " + state);
+    });
+    server.on("/led_auto", []() {
+        ledManualMode = false;
+        server.send(200, "text/plain", "LED auto mode enabled");
+    });
+
+
+    // ===== Mái che =====
+    server.on("/rain_open", []() {
+        rainManualMode = true;
+        rainServoPos = 0;
+        rainServo.write(0);
+        server.send(200, "text/plain", "Rain roof opened manually");
+    });
+    server.on("/rain_close", []() {
+        rainManualMode = true;
+        rainServoPos = 90;
+        rainServo.write(90);
+        server.send(200, "text/plain", "Rain roof closed manually");
+    });
+    server.on("/rain_auto", []() {
+        rainManualMode = false;
+        server.send(200, "text/plain", "Rain roof set to auto mode");
+    });
+
+
+    // ===== Sinric Pro =====
+    SinricProSwitch &ledCtrl = SinricPro[LED_CTRL_ID];
+    ledCtrl.onPowerState(onPowerState);
+    SinricProSwitch &doorCtrl = SinricPro[DOOR_CTRL_ID];
+    doorCtrl.onPowerState(onPowerState);
+    SinricProSwitch &rainCtrl = SinricPro[RAIN_CTRL_ID];
+    rainCtrl.onPowerState(onPowerState);
+
+
+    SinricPro.begin(APP_KEY, APP_SECRET);
+    Serial.println("✅ Sinric Pro ready!");
+
+
+    server.begin();
+    Serial.println("HTTP server started");
+  }
+
+
+// ================= Loop =================
+void loop() {
+    // --- AUTO Pump ---
+    if (!manualMode) {
+        int soilRaw = analogRead(SOIL_PIN);
+        soilPercent = map(soilRaw, 0, 4095, 0, 100);
+        if (soilPercent > 70) {
+            digitalWrite(RELAY_PIN, LOW);
+            pumpState = true;
+        } else {
+            digitalWrite(RELAY_PIN, HIGH);
+            pumpState = false;
+        }
+    }
+
+
+    // --- Mái che mưa ---
+    if (!rainManualMode) {
+        int rainValue = analogRead(RAIN_PIN);
+        if (rainValue < 3000) {
+            rainServo.write(90); // Có mưa → đóng mái
+            rainServoPos = 90;
+        } else {
+            rainServo.write(0);  // Không mưa → mở mái
+            rainServoPos = 0;
+        }
+    } else {
+        rainServo.write(rainServoPos);
+    }
+
+
+    // --- Touch & Buzzer ---
+    int touchState = digitalRead(TOUCH_PIN);
+    touchDetected = (touchState == LOW);
+    digitalWrite(BUZZER_PIN, touchDetected ? LOW : HIGH);
+    buzzerState = touchDetected;
+
+
+    // --- LED Auto / Manual ---
+    SinricPro.handle();
+    if (!ledManualMode) {
+        int lightValue = digitalRead(LDR_PIN);
+        if (lightValue == HIGH) {
+            digitalWrite(LED1, HIGH);
+            digitalWrite(LED2, HIGH);
+            digitalWrite(LED3, HIGH);
+            digitalWrite(LED4, HIGH);
+            digitalWrite(LED5, HIGH);
+            digitalWrite(LED6, HIGH);
+            digitalWrite(LED7, HIGH);
+            digitalWrite(LED8, HIGH);
+            digitalWrite(LED9, HIGH);
+        } else {
+            digitalWrite(LED1, LOW);
+            digitalWrite(LED2, LOW);
+            digitalWrite(LED3, LOW);
+            digitalWrite(LED4, LOW);
+            digitalWrite(LED5, LOW);
+            digitalWrite(LED6, LOW);
+            digitalWrite(LED7, LOW);
+            digitalWrite(LED8, LOW);
+            digitalWrite(LED9, LOW);
+        }
+    } else {
+        digitalWrite(LED1, led1State);
+        digitalWrite(LED2, led2State);
+        digitalWrite(LED3, led3State);
+        digitalWrite(LED4, led4State);
+        digitalWrite(LED5, led5State);
+        digitalWrite(LED6, led6State);
+        digitalWrite(LED7, led7State);
+        digitalWrite(LED8, led8State);
+        digitalWrite(LED9, led9State);
+    }
+
+
+    // --- WebServer ---
+    server.handleClient();
+
+
+    // --- LCD hiển thị mỗi giây ---
+    static unsigned long lastLCD = 0;
+    if (millis() - lastLCD > 1000) {
+        lastLCD = millis();
+        lcd.setCursor(0, 0);
+        lcd.print("T:");
+        lcd.print(dht.readTemperature(), 1);
+        lcd.print((char)223);
+        lcd.print("C H:");
+        lcd.print(dht.readHumidity(), 0);
+        lcd.print("%");
+
+
+        lcd.setCursor(0, 1);
+        lcd.print("Soil:");
+        lcd.print(soilPercent);
+        lcd.print("% ");
+        lcd.print(pumpState ? "ON" : "OFF");
+    }
+    SinricPro.handle();
+}
+
