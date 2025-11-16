@@ -9,21 +9,21 @@ from PIL import Image, ImageTk
 import pygame
 import winsound
 import customtkinter as ctk
-import requests 
+import requests
 import threading
-import json 
+import json
 ESP32_IP = "172.20.10.8"
 door_open= False
 led_1_on= False
-led_2_on= False 
+led_2_on= False
 led_3_on= False
 led_4_on= False
 led_5_on= False
 led_6_on= False
 led_7_on= False
 led_8_on= False
-led_9_on= False   
-hao_quang1_label = None   
+led_9_on= False  
+hao_quang1_label = None  
 hao_quang2_label = None  
 hao_quang3_label = None  
 hao_quang4_label = None  
@@ -34,15 +34,15 @@ hao_quang8_label = None
 hao_quang9_label = None  
 pygame.mixer.init()
 playing= True
-pygame.mixer.music.load("D:\\Garden On The Sky - Khu Vườn Trên Mây - M312C's Chill Remix - Remastered.wav")
+pygame.mixer.music.load("C:\\Users\\truon\\Downloads\\Garden On The Sky - Khu Vườn Trên Mây - M312C's Chill Remix - Remastered.wav")
 def show_frame(frame):
     frame.tkraise()
 def play_night_light():
-    winsound.PlaySound("D:\\c648ca67-46ad-4fed-82b6-4899cbbcfa5f.wav", winsound.SND_FILENAME | winsound.SND_ASYNC)
+    winsound.PlaySound("C:\\Users\\truon\\Downloads\\c648ca67-46ad-4fed-82b6-4899cbbcfa5f.wav", winsound.SND_FILENAME | winsound.SND_ASYNC)
 def play_light():
-    winsound.PlaySound("D:\\041b4860-7e3d-4ae8-8ea2-e131b4e42b55.wav", winsound.SND_FILENAME | winsound.SND_ASYNC)
+    winsound.PlaySound("C:\\Users\\truon\Downloads\\041b4860-7e3d-4ae8-8ea2-e131b4e42b55.wav", winsound.SND_FILENAME | winsound.SND_ASYNC)
 def play_bob():
-    winsound.PlaySound("D:\\v12044gd0000cfublj3c77u45mgp343g.wav", winsound.SND_FILENAME | winsound.SND_ASYNC)
+    winsound.PlaySound("C:\\Users\\truon\\Downloads\\v12044gd0000cfublj3c77u45mgp343g.wav", winsound.SND_FILENAME | winsound.SND_ASYNC)
 def song_theme():
     global playing
     if playing:
@@ -74,12 +74,14 @@ def pump_on():
     except Exception as e:
         print(" Lỗi khi bật bơm:", e)
 
+
 def pump_off():
     """Tắt bơm thủ công"""
     try:
         r = requests.get(f"http://{ESP32_IP}/pump?state=off", timeout=2)
     except Exception as e:
         print(" Lỗi khi tắt bơm:", e)
+
 
 def pump_auto():
     """Bật chế độ tự động tưới (ESP32 tự quyết định khi nào bật/tắt)"""
@@ -93,11 +95,13 @@ def led1_on():
     except Exception as e:
         print("Lỗi khi bật LED1:", e)
 
+
 def led1_off():
     try:
         requests.get(f"http://{ESP32_IP}/led1?state=off", timeout=2)
     except Exception as e:
         print("Lỗi khi tắt LED1:", e)
+
 
 def led2_on():
     try:
@@ -105,17 +109,20 @@ def led2_on():
     except Exception as e:
         print("Lỗi khi bật LED2:", e)
 
+
 def led2_off():
     try:
         requests.get(f"http://{ESP32_IP}/led2?state=off", timeout=2)
     except Exception as e:
         print("Lỗi khi tắt LED2:", e)
 
+
 def led3_on():
     try:
         requests.get(f"http://{ESP32_IP}/led3?state=on", timeout=2)
     except Exception as e:
         print("Lỗi khi bật LED3:", e)
+
 
 def led3_off():
     try:
@@ -128,6 +135,7 @@ def led4_on():
     except Exception as e:
         print("Lỗi khi bật LED4:", e)
 
+
 def led4_off():
     try:
         requests.get(f"http://{ESP32_IP}/led4?state=off", timeout=2)
@@ -138,6 +146,7 @@ def led5_on():
         requests.get(f"http://{ESP32_IP}/led5?state=on", timeout=2)
     except Exception as e:
         print("Lỗi khi bật LED5:", e)
+
 
 def led5_off():
     try:
@@ -150,6 +159,7 @@ def led6_on():
     except Exception as e:
         print("Lỗi khi bật LED5:", e)
 
+
 def led6_off():
     try:
         requests.get(f"http://{ESP32_IP}/led6?state=off", timeout=2)
@@ -160,6 +170,7 @@ def led7_on():
         requests.get(f"http://{ESP32_IP}/led7?state=on", timeout=2)
     except Exception as e:
         print("Lỗi khi bật LED5:", e)
+
 
 def led7_off():
     try:
@@ -172,6 +183,7 @@ def led8_on():
     except Exception as e:
         print("Lỗi khi bật LED5:", e)
 
+
 def led8_off():
     try:
         requests.get(f"http://{ESP32_IP}/led8?state=off", timeout=2)
@@ -182,6 +194,7 @@ def led9_on():
         requests.get(f"http://{ESP32_IP}/led9?state=on", timeout=2)
     except Exception as e:
         print("Lỗi khi bật LED5:", e)
+
 
 def led9_off():
     try:
@@ -195,11 +208,13 @@ def led_auto():
     except Exception as e:
         print("Lỗi khi bật chế độ LED auto:", e)
 
+
 def rain_open():
     try:
         requests.get(f"http://{ESP32_IP}/rain_open", timeout=2)
     except Exception as e:
         print("Lỗi khi mở mái che:", e)
+
 
 def rain_close():
     try:
@@ -207,15 +222,17 @@ def rain_close():
     except Exception as e:
         print("Lỗi khi đóng mái che:", e)
 
+
 def rain_auto():
     try:
         requests.get(f"http://{ESP32_IP}/rain_auto", timeout=2)
     except Exception as e:
         print("Lỗi khi bật chế độ auto mái che:", e)
 def check_rain_status():
-    try: 
+    try:
         res = requests.get(f"{ESP32_IP}/status", timeout=2)
         data = res.json()
+        print("📦 Dữ liệu ESP32 trả về:", data)
         rain_status = data.get("rain", "close")
         if rain_status == "open":
             show_rain_warning()
@@ -224,12 +241,14 @@ def check_rain_status():
     except Exception as e:
         print("Lỗi đọc dữ liệu từ ESP32",e)
     root.after(3000,check_rain_status)
+
+
 def show_led1_on(): #led chỗ vườn hoa quả
     global led_1_on, hao_quang1_label
     if led_1_on and hao_quang1_label is not None:
         return
     led_1_on = True
-    img= Image.open("D:\\Sáng_lên_vừng ơing_lên_vừng ơi.png")
+    img= Image.open("C:\\Users\\truon\\Downloads\\Sáng_lên_vừng ơing_lên_vừng ơi.png")
     cropped= img.crop ((456,535,631,726))
     cropped_tk = ImageTk.PhotoImage(cropped)
     hao_quang1_label = Label(root, image=cropped_tk, borderwidth=0)
@@ -237,7 +256,7 @@ def show_led1_on(): #led chỗ vườn hoa quả
     hao_quang1_label.place(x=455, y=550)
     hao_quang1_label.bind("<Button-1>", lambda e: (hide_led1_off(), led1_off()))
 def hide_led1_off():
-    global led_1_on, hao_quang1_label 
+    global led_1_on, hao_quang1_label
     led_1_on= False
     if hao_quang1_label:
         hao_quang1_label.destroy()
@@ -245,7 +264,7 @@ def hide_led1_off():
 def show_led2_on():  #led vàng bên trái vường hoa quả
     global led_2_on, hao_quang2_label
     led_2_on = True
-    img= Image.open("D:\\Sáng_lên_vừng ơing_lên_vừng ơi.png")
+    img= Image.open("C:\\Users\\truon\\Downloads\\Sáng_lên_vừng ơing_lên_vừng ơi.png")
     cropped= img.crop ((0,506,121,648))
     cropped_tk = ImageTk.PhotoImage(cropped)
     hao_quang2_label = Label(root, image=cropped_tk, borderwidth=0)
@@ -253,7 +272,7 @@ def show_led2_on():  #led vàng bên trái vường hoa quả
     hao_quang2_label.place(x=0, y=520)
     hao_quang2_label.bind("<Button-1>", lambda e: (hide_led2_off(), led2_off()))
 def hide_led2_off():  
-    global led_2_on, hao_quang2_label 
+    global led_2_on, hao_quang2_label
     led_2_on= False
     if hao_quang2_label:
         hao_quang2_label.destroy()
@@ -261,15 +280,15 @@ def hide_led2_off():
 def show_led3_on():  #led vàng trên cùng
     global led_3_on, hao_quang3_label
     led_3_on = True
-    img= Image.open("D:\\Sáng_lên_vừng ơing_lên_vừng ơi.png")
+    img= Image.open("C:\\Users\\truon\\Downloads\\Sáng_lên_vừng ơing_lên_vừng ơi.png")
     cropped= img.crop ((764,15,941,158))
     cropped_tk = ImageTk.PhotoImage(cropped)
     hao_quang3_label = Label(root, image=cropped_tk, borderwidth=0)
     hao_quang3_label.image = cropped_tk
     hao_quang3_label.place(x=764, y=30)
     hao_quang3_label.bind("<Button-1>", lambda e: (hide_led3_off(), led3_off()))
-def hide_led3_off(): 
-    global led_3_on, hao_quang3_label 
+def hide_led3_off():
+    global led_3_on, hao_quang3_label
     led_3_on= False
     if hao_quang3_label:
         hao_quang3_label.destroy()
@@ -277,7 +296,7 @@ def hide_led3_off():
 def show_led4_on():  #led vàng trong chuồng
     global led_4_on, hao_quang4_label
     led_4_on = True
-    img= Image.open("D:\\Sáng_lên_vừng ơing_lên_vừng ơi.png")
+    img= Image.open("C:\\Users\\truon\\Downloads\\Sáng_lên_vừng ơing_lên_vừng ơi.png")
     cropped= img.crop ((1777,18,1981,162))
     cropped_tk = ImageTk.PhotoImage(cropped)
     hao_quang4_label = Label(root, image=cropped_tk, borderwidth=0)
@@ -285,7 +304,7 @@ def show_led4_on():  #led vàng trong chuồng
     hao_quang4_label.place(x=1777, y=33)
     hao_quang4_label.bind("<Button-1>", lambda e: (hide_led4_off(), led4_off()))
 def hide_led4_off():
-    global led_4_on, hao_quang4_label 
+    global led_4_on, hao_quang4_label
     led_4_on= False
     if hao_quang4_label:
         hao_quang4_label.destroy()
@@ -293,7 +312,7 @@ def hide_led4_off():
 def show_led5_on():  #led vàng bụi hoa bên phải
     global led_5_on, hao_quang5_label
     led_5_on = True
-    img= Image.open("D:\\Sáng_lên_vừng ơing_lên_vừng ơi.png")
+    img= Image.open("C:\\Users\\truon\\Downloads\\Sáng_lên_vừng ơing_lên_vừng ơi.png")
     cropped= img.crop ((1795,515,1919,622))
     cropped_tk = ImageTk.PhotoImage(cropped)
     hao_quang5_label = Label(root, image=cropped_tk, borderwidth=0)
@@ -301,7 +320,7 @@ def show_led5_on():  #led vàng bụi hoa bên phải
     hao_quang5_label.place(x=1795, y=530)
     hao_quang5_label.bind("<Button-1>", lambda e: (hide_led5_off(), led5_off()))
 def hide_led5_off():
-    global led_5_on, hao_quang5_label 
+    global led_5_on, hao_quang5_label
     led_5_on= False
     if hao_quang5_label:
         hao_quang5_label.destroy()
@@ -309,7 +328,7 @@ def hide_led5_off():
 def show_led6_on():  #led đỏ hồ cá
     global led_6_on, hao_quang6_label
     led_6_on = True
-    img= Image.open("D:\\Sáng_lên_vừng ơing_lên_vừng ơi.png")
+    img= Image.open("C:\\Users\\truon\\Downloads\\Sáng_lên_vừng ơing_lên_vừng ơi.png")
     cropped= img.crop ((1798,622,1918,740))
     cropped_tk = ImageTk.PhotoImage(cropped)
     hao_quang6_label = Label(root, image=cropped_tk, borderwidth=0)
@@ -317,7 +336,7 @@ def show_led6_on():  #led đỏ hồ cá
     hao_quang6_label.place(x=1798, y=637)
     hao_quang6_label.bind("<Button-1>", lambda e: (hide_led6_off(), led6_off()))
 def hide_led6_off():
-    global led_6_on, hao_quang6_label 
+    global led_6_on, hao_quang6_label
     led_6_on= False
     if hao_quang6_label:
         hao_quang6_label.destroy()
@@ -325,7 +344,7 @@ def hide_led6_off():
 def show_led7_on():  #led vàng hồ cá
     global led_7_on, hao_quang7_label
     led_7_on = True
-    img= Image.open("D:\\Sáng_lên_vừng ơing_lên_vừng ơi.png")
+    img= Image.open("C:\\Users\\truon\\Downloads\\Sáng_lên_vừng ơing_lên_vừng ơi.png")
     cropped= img.crop ((1774,853,1919,986))
     cropped_tk = ImageTk.PhotoImage(cropped)
     hao_quang7_label = Label(root, image=cropped_tk, borderwidth=0)
@@ -333,7 +352,7 @@ def show_led7_on():  #led vàng hồ cá
     hao_quang7_label.place(x=1774, y=868)
     hao_quang7_label.bind("<Button-1>", lambda e: (hide_led7_off(), led7_off()))
 def hide_led7_off():
-    global led_7_on, hao_quang7_label 
+    global led_7_on, hao_quang7_label
     led_7_on= False
     if hao_quang7_label:
         hao_quang7_label.destroy()
@@ -341,7 +360,7 @@ def hide_led7_off():
 def show_led8_on(): #led đỏ cổng phải
     global led_8_on, hao_quang8_label
     led_8_on = True
-    img= Image.open("D:\\Sáng_lên_vừng ơing_lên_vừng ơi.png")
+    img= Image.open("C:\\Users\\truon\\Downloads\\Sáng_lên_vừng ơing_lên_vừng ơi.png")
     cropped= img.crop ((937,835,1076,960))
     cropped_tk = ImageTk.PhotoImage(cropped)
     hao_quang8_label = Label(root, image=cropped_tk, borderwidth=0)
@@ -349,7 +368,7 @@ def show_led8_on(): #led đỏ cổng phải
     hao_quang8_label.place(x=937, y=851)
     hao_quang8_label.bind("<Button-1>", lambda e: (hide_led8_off(), led8_off()))
 def hide_led8_off():
-    global led_8_on, hao_quang8_label 
+    global led_8_on, hao_quang8_label
     led_8_on= False
     if hao_quang8_label:
         hao_quang8_label.destroy()
@@ -357,7 +376,7 @@ def hide_led8_off():
 def show_led9_on():  #led đỏ cổng trái
     global led_9_on, hao_quang9_label
     led_9_on = True
-    img= Image.open("D:\\Sáng_lên_vừng ơing_lên_vừng ơi.png")
+    img= Image.open("C:\\Users\\truon\\Downloads\\Sáng_lên_vừng ơing_lên_vừng ơi.png")
     cropped= img.crop ((604,820,742,960))
     cropped_tk = ImageTk.PhotoImage(cropped)
     hao_quang9_label = Label(root, image=cropped_tk, borderwidth=0)
@@ -365,25 +384,29 @@ def show_led9_on():  #led đỏ cổng trái
     hao_quang9_label.place(x=604, y=835)
     hao_quang9_label.bind("<Button-1>", lambda e: (hide_led9_off(), led9_off()))
 def hide_led9_off():
-    global led_9_on, hao_quang9_label 
+    global led_9_on, hao_quang9_label
     led_9_on= False
     if hao_quang9_label:
         hao_quang9_label.destroy()
         hao_quang9_label= None
 def show_rain_warning():
-    global rain_label 
-    if 'rain_label' in globals():
-        return
-    rain_image= PhotoImage(file="D:\\Đóng chuồng auto.png")
-    rain_label = Label(root,image=rain_image)
-    rain_label.image = rain_image
-    rain_label.place(x=900, y=290)
-def hide_rain_warning():
-    global rain_label 
+    global rain_label
     try:
         rain_label.destroy()
     except:
         pass
+    rain_image = PhotoImage(file="C:\\Users\\truon\\Downloads\\Đóng chuồng auto.png")
+    rain_label = Label(root, image=rain_image)
+    rain_label.image = rain_image
+    rain_label.place(x=900, y=290)
+def hide_rain_warning():
+    global rain_label
+    try:
+        rain_label.destroy()
+    except:
+        pass
+
+
 def update_status():
     """
     Hàm này chạy liên tục trong một luồng riêng (thread)
@@ -396,9 +419,10 @@ def update_status():
             r = requests.get(f"http://{ESP32_IP}/status", timeout=2)
             data = r.json()  # Nhận phản hồi JSON từ ESP32
 
+
             # Cập nhật các biến hiển thị trên giao diện
-            temp_var.set(f"Nhiệt độ: {data['temp']} °C")
-            soil_var.set(f"Độ ẩm đất: {data['soil']} %")
+            temp_var.set(f"{data['temp']} °C")
+            soil_var.set(f"{data['soil']} %")
         except Exception as e:
             # Khi mất kết nối hoặc ESP32 không phản hồi
             temp_var.set(" Không thể kết nối ESP32")
@@ -406,7 +430,8 @@ def update_status():
         # Cập nhật mỗi 2 giây một lần
         time.sleep(2)
 
-# 
+
+#
 def dang_nhap():
     if username.get()=="" or username.get()=="":
         showwarning(title="Cảnh báo",message="Vui lòng nhập đầy đủ thông tin")
@@ -414,7 +439,7 @@ def dang_nhap():
         showwarning (title="Cảnh báo",message="Tài khoản không tồn tại")
     else:
         if password.get()!=taikhoan[username.get()]:
-            showwarning (title="Cảnh báo",message="Sai mật khẩu")   
+            showwarning (title="Cảnh báo",message="Sai mật khẩu")  
         else:
             showinfo (title="Thông báo",message="Đăng nhập thành công")
             open_home()
@@ -422,7 +447,7 @@ def dang_ky_2():
         if username.get()=="" or password.get()=="" :
             showwarning(title="Cảnh báo",message="Vui lòng nhập đầy đủ thông tin")
         elif username.get() in taikhoan:
-            showwarning (title="Cảnh báo",message="Tài khoản đã tồn tại")       
+            showwarning (title="Cảnh báo",message="Tài khoản đã tồn tại")      
         else:
          taikhoan[username.get()]=password.get()
          showinfo (title="Thông báo",message="Đăng ký thành công")
@@ -430,11 +455,11 @@ def dang_ky_2():
          password.insert(0,password.get())
          username.delete(0,END)
          username.insert(0,username.get())
-def quenmk_2():   
+def quenmk_2():  
         if username.get()=="" or password.get()=="" :
             showwarning(title="Cảnh báo",message="Vui lòng nhập đầy đủ thông tin")
         elif username.get() not in taikhoan:
-            showwarning (title="Cảnh báo",message="Tài khoản không tồn tại")       
+            showwarning (title="Cảnh báo",message="Tài khoản không tồn tại")      
         else:
          taikhoan[username.get()]=password.get()
          showinfo (title="Thông báo",message="Đặt lại mật khẩu thành công")
@@ -453,7 +478,7 @@ def on_focusout(e):
 def on_focusin_pass(e):
     if password.get() == "Password...":
         password.delete(0, "end")
-        password.config(fg="black", show="*")   
+        password.config(fg="black", show="*")  
 def on_focusout_pass(e):
     if password.get() == "":
         password.insert(0, "Password...")
@@ -464,18 +489,18 @@ def update_time():
     root.after(1000, update_time)
 def open_home():
     clear_screen()
-    bg_image = Image.open("D:\\DASHBOARD.png")
-    bg_photo = ImageTk.PhotoImage(bg_image) 
+    bg_image = Image.open("C:\\Users\\truon\\Downloads\\DASHBOARD.png")
+    bg_photo = ImageTk.PhotoImage(bg_image)
     bg_label= Label(root, image=bg_photo)
     bg_label.image = bg_photo  # Keep a reference to avoid garbage collection
     bg_label.place(x=0, y=0, relwidth=1, relheight=1)
     bg_label.lower()
-    music_icon= PhotoImage(file="D:\\music_icon.png")
+    music_icon= PhotoImage(file="C:\\Users\\truon\\Downloads\\music_icon.png")
     music_icon= music_icon.subsample(15, 15)
     music_btn= Button(root, image= music_icon, command= song_theme)
     music_btn.image = music_icon
     music_btn.place(x=1700, y=20)
-    log_out_icon= PhotoImage(file="D:\\logouticon.png")
+    log_out_icon= PhotoImage(file="C:\\Users\\truon\\Downloads\\logouticon.png")
     log_out_icon= log_out_icon.subsample(10, 10)
     log_out_button= Button(root, image= log_out_icon,  command=lambda: (play_bob(),root.destroy()))
     log_out_button.image = log_out_icon
@@ -508,40 +533,40 @@ def on_click(e):
         open_lighting()
 def open_cattle_shed():
     clear_screen()
-    bg_image = Image.open("D:\\Cattle Shed (2).png")
+    bg_image = Image.open("C:\\Users\\truon\\Downloads\\Cattle Shed (3).png")
     bg_photo = ImageTk.PhotoImage(bg_image)
     bg_label = Label(root, image=bg_photo)
     bg_label.place(x=0, y=0, relwidth=1, relheight=1)
     bg_label.image = bg_photo  # Keep a reference to avoid garbage collection
     bg_label.place(x=0, y=0, relwidth=1, relheight=1)
     bg_label.lower()
-    music_icon= PhotoImage(file="D:\\music_icon.png")
+    music_icon= PhotoImage(file="C:\\Users\\truon\\Downloads\\music_icon.png")
     music_icon= music_icon.subsample(15, 15)
     music_btn= Button(root, image= music_icon, command= song_theme)
     music_btn.image = music_icon
     music_btn.place(x=1700, y=20)
-    log_out_icon= PhotoImage(file="D:\\logouticon.png")
+    log_out_icon= PhotoImage(file="C:\\Users\\truon\\Downloads\\logouticon.png")
     log_out_icon= log_out_icon.subsample(10, 10)
     log_out_button= Button(root, image= log_out_icon,  command=lambda: (play_bob(),root.destroy()))
     log_out_button.image = log_out_icon
-    log_out_button.place(x=1800, y=25) 
+    log_out_button.place(x=1800, y=25)
     bg_label.bind("<Button-1>", on_click_3)
     check_rain_status()
 def open_lighting():
     clear_screen()
-    bg_image= Image.open("D:\\Lighting_dynamite.png")
+    bg_image= Image.open("C:\\Users\\truon\\Downloads\\Lighting_dynamite.png")
     bg_photo= ImageTk.PhotoImage(bg_image)
     bg_label= Label(root, image=bg_photo)
     bg_label.place(x=0,y=0, relwidth=1, relheight=1)
-    bg_label.image= bg_photo 
+    bg_label.image= bg_photo
     bg_label.place(x=0,y=0,relwidth=1,relheight=1)
     bg_label.lower()
-    music_icon= PhotoImage(file="D:\\music_icon.png")
+    music_icon= PhotoImage(file="C:\\Users\\truon\\Downloads\\music_icon.png")
     music_icon= music_icon.subsample(15, 15)
     music_btn= Button(root, image= music_icon, command= song_theme)
     music_btn.image = music_icon
     music_btn.place(x=1700, y=20)
-    log_out_icon= PhotoImage(file="D:\\logouticon.png")
+    log_out_icon= PhotoImage(file="C:\\Users\\truon\\Downloads\\logouticon.png")
     log_out_icon= log_out_icon.subsample(10, 10)
     log_out_button= Button(root, image= log_out_icon,  command=lambda: (play_bob(),root.destroy()))
     log_out_button.image = log_out_icon
@@ -549,19 +574,19 @@ def open_lighting():
     bg_label.bind("<Button-1>", on_click_4)
 def auto_light():
     clear_screen()
-    bg_image= Image.open("D:\\Lighting_AUTO.png")
+    bg_image= Image.open("C:\\Users\\truon\\Downloads\\Lighting_AUTO.png")
     bg_photo= ImageTk.PhotoImage(bg_image)
     bg_label= Label(root, image=bg_photo)
     bg_label.place(x=0,y=0, relwidth=1, relheight=1)
-    bg_label.image= bg_photo 
+    bg_label.image= bg_photo
     bg_label.place(x=0,y=0,relwidth=1,relheight=1)
     bg_label.lower()
-    music_icon= PhotoImage(file="D:\\music_icon.png")
+    music_icon= PhotoImage(file="C:\\Users\\truon\\Downloads\\music_icon.png")
     music_icon= music_icon.subsample(15, 15)
     music_btn= Button(root, image= music_icon, command= song_theme)
     music_btn.image = music_icon
     music_btn.place(x=1700, y=20)
-    log_out_icon= PhotoImage(file="D:\\logouticon.png")
+    log_out_icon= PhotoImage(file="C:\\Users\\truon\\Downloads\\logouticon.png")
     log_out_icon= log_out_icon.subsample(10, 10)
     log_out_button= Button(root, image= log_out_icon,  command=lambda: (play_bob(),root.destroy()))
     log_out_button.image = log_out_icon
@@ -570,26 +595,27 @@ def auto_light():
 def open_garden():
     global temp_var, soil_var, time_label
     clear_screen()
-    bg_image = Image.open("D:\\GARDEN (2).png")
+    bg_image = Image.open("C:\\Users\\truon\\Downloads\\GARDEN (2).png")
     bg_photo = ImageTk.PhotoImage(bg_image)
     bg_label = Label(root, image=bg_photo)
     bg_label.place(x=0, y=0, relwidth=1, relheight=1)
     bg_label.image = bg_photo  # Keep a reference to avoid garbage collection
     bg_label.place(x=0, y=0, relwidth=1, relheight=1)
     bg_label.lower()
-    temp_label = Label(root, textvariable=temp_var, font=("Arial", 14), fg="black")
-    temp_label.place(x=700, y=330)
-    soil_label = Label(root, textvariable=soil_var, font=("Arial", 14), fg="black")
-    soil_label.place(x=1490, y=340)
-    music_icon= PhotoImage(file="D:\\music_icon.png")
+    temp_label = Label(root, textvariable=temp_var, font=("Arial", 50), fg="black",bg="#E8E8E8")
+    temp_label.place(x=610, y=290)
+    soil_label = Label(root, textvariable=soil_var, font=("Arial", 50), fg="black",bg="#E8E8E8")
+    soil_label.place(x=1360, y=300)
+    threading.Thread(target=update_status, daemon=True).start()
+    music_icon= PhotoImage(file="C:\\Users\\truon\\Downloads\\music_icon.png")
     music_icon= music_icon.subsample(15, 15)
     music_btn= Button(root, image= music_icon, command= song_theme)
     music_btn.image = music_icon
-    log_out_icon= PhotoImage(file="D:\\logouticon.png")
+    log_out_icon= PhotoImage(file="C:\\Users\\truon\\Downloads\\logouticon.png")
     log_out_icon= log_out_icon.subsample(10, 10)
     log_out_button= Button(root, image= log_out_icon,  command=lambda: (play_bob(),root.destroy()))
     log_out_button.image = log_out_icon
-    log_out_button.place(x=1800, y=25) 
+    log_out_button.place(x=1800, y=25)
     time_label = Label(root, font=("Arial", 40,'bold' ), fg="black", bg="#eaeaea")
     time_label.place(x=1600, y=135)
     music_btn.place(x=1700, y=20)
@@ -626,40 +652,42 @@ def on_click_2(e):
         open_lighting()
 def switch():
     clear_screen()
-    bg_image = Image.open("D:\\switch.png")
+    bg_image = Image.open("C:\\Users\\truon\\Downloads\\switch 1.png")
     bg_photo = ImageTk.PhotoImage(bg_image)
     bg_label = Label(root, image=bg_photo)
     bg_label.place(x=0, y=0, relwidth=1, relheight=1)
     bg_label.image = bg_photo  # Keep a reference to avoid garbage collection
     bg_label.place(x=0, y=0, relwidth=1, relheight=1)
     bg_label.lower()
-    music_icon= PhotoImage(file="D:\\music_icon.png")
+    music_icon= PhotoImage(file="C:\\Users\\truon\\Downloads\\music_icon.png")
     music_icon= music_icon.subsample(15, 15)
     music_btn= Button(root, image= music_icon, command= song_theme)
     music_btn.image = music_icon
     music_btn.place(x=1700, y=20)
-    log_out_icon= PhotoImage(file="D:\\logouticon.png")
+    log_out_icon= PhotoImage(file="C:\\Users\\truon\\Downloads\\logouticon.png")
     log_out_icon= log_out_icon.subsample(10, 10)
     log_out_button= Button(root, image= log_out_icon,  command=lambda: (play_bob(),root.destroy()))
     log_out_button.image = log_out_icon
-    log_out_button.place(x=1800, y=25) 
+    log_out_button.place(x=1800, y=25)
     bg_label.bind("<Button-1>", on_click_3)
 def on_click_3(e):
     global door_open
     if 1420<= e.x <= 1538 and 884 <= e.y <= 968:
         play_bob()
-        switch() 
+        switch()
         threading.Thread(target=rain_open).start()
     elif 1420<= e.x <= 1538 and 791<= e.y <= 867:
         play_bob()
         open_cattle_shed()
         threading.Thread(target=rain_close).start()
-    elif 1637 <= e.x <= 1870 and 800<= e.y <= 957:
-        play_bob()
-        threading.Thread(target=rain_auto).start()
     elif 64 <= e.x <= 235 and 32 <= e.y <= 195:
         play_bob()
         open_home()
+    elif 1637 <= e.x <= 1870 and 800 <= e.y <= 957:
+        play_bob()
+        threading.Thread(target=rain_auto).start()
+
+
     elif 50<= e.x <=182 and 333<= e.y <= 450:
         play_bob()
         if not door_open:
@@ -675,7 +703,7 @@ def on_click_3(e):
         play_bob()
         open_lighting()
 def on_click_4(e):
-    global door_open, led_1_on, led_2_on, led_3_on, led_4_on, led_5_on, led_6_on, led_7_on, led_8_on, led_9_on, hao_quang_label 
+    global door_open, led_1_on, led_2_on, led_3_on, led_4_on, led_5_on, led_6_on, led_7_on, led_8_on, led_9_on, hao_quang_label
     if 97<= e.x <= 246 and 53<= e.y <= 216:
         play_bob()
         open_home()
@@ -744,11 +772,11 @@ def on_click_4(e):
         threading.Thread(target=led_auto).start()
 def open_login():
     clear_screen()
-    bg_image = Image.open("D:\\LOGIN (1).png")
+    bg_image = Image.open("C:\\Users\\truon\\Downloads\\LOGIN (1).png")
     bg_photo = ImageTk.PhotoImage(bg_image)
     bg_label = Label(root, image=bg_photo)
     bg_label.place(x=0, y=0, relwidth=1, relheight=1)
-    bg_label.image = bg_photo  # Keep a reference to avoid garbage collection   
+    bg_label.image = bg_photo  # Keep a reference to avoid garbage collection  
     bg_label.place(x=0, y=0, relwidth=1, relheight=1)
     global username, password
     username = Entry(root, font=("Arial", 20), width=30)
@@ -759,21 +787,21 @@ def open_login():
     password.bind ("<FocusIn>", on_focusin_pass)
     password.bind("<FocusOut>", on_focusout_pass)
     password.place(relx=0.5, rely=0.3, anchor=tk.CENTER)
-    music_icon= PhotoImage(file="D:\\music_icon.png")   
+    music_icon= PhotoImage(file="C:\\Users\\truon\\Downloads\\music_icon.png")  
     music_icon= music_icon.subsample(15, 15)
-    log_out_icon= PhotoImage(file="D:\\logouticon.png")
+    log_out_icon= PhotoImage(file="C:\\Users\\truon\\Downloads\\logouticon.png")
     log_out_icon= log_out_icon.subsample(10, 10)
     log_out_button= Button(root, image= log_out_icon, command=lambda: (play_bob(),root.destroy()))
     log_out_button.image = log_out_icon
     log_out_button.place(x=1800, y=25)
     log_in_button= Button( root, text="Log in", font=("Arial",18,"bold"),  fg= "white", bg= "#28acec" ,command=lambda: (play_bob(), dang_nhap()))
-    log_in_button.place(relx=0.3, rely=0.4, anchor=tk.CENTER)       
+    log_in_button.place(relx=0.3, rely=0.4, anchor=tk.CENTER)      
     sign_up_button= Button( root, text="Sign in", font=("Arial",18,"bold"), fg= "white",bg= "#28acec", command=lambda: (play_bob(), dang_ky_2()))
     sign_up_button.place(relx=0.5, rely=0.4, anchor=tk.CENTER)
     forgot_button= Button( root,text="Forget", font=("Arial",18,"bold"), fg= "white", bg= "#28acec", command=lambda: (play_bob(), quenmk_2()))
     forgot_button.place(relx=0.7, rely=0.4, anchor=tk.CENTER)
     music_btn= Button(root, image= music_icon, command= song_theme)  
-    music_btn.image = music_icon   
+    music_btn.image = music_icon  
     music_btn.place(x=1700, y=20)
 root= Tk()
 root.title("My Shaylala Farm")
@@ -781,21 +809,21 @@ root.geometry("800x600")
 ctk.set_appearance_mode("light")
 ctk.set_default_color_theme("blue")
 app= ctk.CTk()
-bg_image = Image.open("D:\\LOGIN (1).png")
+bg_image = Image.open("C:\\Users\\truon\\Downloads\\LOGIN (1).png")
 bg_photo = ImageTk.PhotoImage(bg_image)
 bg_label = Label(root, image=bg_photo)
 bg_label.place(x=0, y=0, relwidth=1, relheight=1)
 username = Entry(root, font=("Arial", 20), width=30)
 username.bind("<FocusIn>", on_focusin)
-username.bind("<FocusOut>", on_focusout) 
+username.bind("<FocusOut>", on_focusout)
 username.place(relx=0.5, rely=0.2, anchor=tk.CENTER)
 password = Entry(root, show="*", font=("Arial", 20), width=30)
 password.bind ("<FocusIn>", on_focusin_pass)
 password.bind("<FocusOut>", on_focusout_pass)
 password.place(relx=0.5, rely=0.3, anchor=tk.CENTER)
-music_icon= PhotoImage(file="D:\\music_icon.png")
+music_icon= PhotoImage(file="C:\\Users\\truon\\Downloads\\music_icon.png")
 music_icon= music_icon.subsample(15, 15)
-log_out_icon= PhotoImage(file="D:\\logouticon.png")
+log_out_icon= PhotoImage(file="C:\\Users\\truon\\Downloads\\logouticon.png")
 log_out_icon= log_out_icon.subsample(10, 10)
 log_out_button= Button(root, image= log_out_icon, command=lambda: (play_bob(),root.destroy()))
 log_out_button.place(x=1800, y=25)
@@ -816,4 +844,5 @@ rain_var = tk.StringVar()
 pump_var = tk.StringVar()
 servo_var = tk.StringVar()
 mainloop()
-                        
+                       
+
